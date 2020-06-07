@@ -35,15 +35,11 @@ const Label = styled.p`
     left: ${props => props.x};
     color: #888888;
     font-size: 15px;
+    user-select: none;
 `;
 
 
-function genNumericLabels (points, parentwidth) {
-    
-    let sorted_points = [...points].sort((p1, p2) => p1.val - p2.val);
-    let point_start_val = sorted_points[0].val;
-    let point_end_val = sorted_points[points.length - 1].val;
-    let div_width = parentwidth/(point_end_val - point_start_val);
+function genNumericLabels (points, div_width, point_start_val) {
 
     return (
         [points.map(point => (
@@ -58,9 +54,7 @@ function genNumericLabels (points, parentwidth) {
     );
 }
 
-function genTextLabels (points, parentwidth) {
-    
-    let div_width = parentwidth/(points.length);
+function genTextLabels (points, div_width) {
 
     return (
         [points.map((point, index) => (
@@ -76,43 +70,82 @@ function genTextLabels (points, parentwidth) {
 }
 
 
+function posToVal(ref, div_width){
+    return ref/div_width;
+}
+
+function nearestVal(refval, points){
+    let [min, val] = [Infinity, null];
+
+    for (let point of points) {
+        let diff = Math.abs(point.val - refval);
+        if (diff < min) {
+        min = diff;
+        val = point.val;
+        }
+    }
+    return val;
+}
 
 export default class Slider extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleInput = this.handleInput.bind(this);
+
     this.handleDragEnter = this.handleDragEnter.bind(this);
     this.handleDragExit = this.handleDragExit.bind(this);
     this.handleDragThrough = this.handleDragThrough.bind(this);
 
-    this.thumbRef = React.createRef();
+    this.containerRef = React.createRef();
 
     this.state = {
         thumbxpos: 0,
+        thumbval: 0,
         mousedown: false,
+        offsetLeft: 0,
+        point_start_val: 0,
+        point_end_val: 0,
+        div_width: 0,
     }
 
   }
-  handleInput(e, inputState) {
-
+  componentDidMount(){
+    const rect = this.containerRef.current.getBoundingClientRect();
+    //console.log(rect.left);
+    if (!this.props.isText){
+        let sorted_points = [...this.props.points].sort((p1, p2) => p1.val - p2.val);
+        let point_start_val = sorted_points[0].val;
+        let point_end_val = sorted_points[sorted_points.length - 1].val;
+        let div_width = this.props.width/(point_end_val - point_start_val);
+        this.setState({offsetLeft: rect.left, point_start_val, point_end_val, div_width, thumbval: point_start_val});
+    }else {
+        let div_width = this.props.width/(this.props.points.length - 1);
+        this.setState({offsetLeft: rect.left, div_width});
+    }
   }
 
   handleDragEnter(e) {
-    console.log(e.nativeEvent.offsetX);
-    
-    this.setState({mousedown: true, thumbxpos: e.nativeEvent.offsetX});
+    this.setState({mousedown: true, thumbxpos: e.nativeEvent.clientX - this.state.offsetLeft});
   }
   handleDragExit(e) {
-    //console.log(e.nativeEvent.offsetX);
-    
-    this.setState({mousedown: false});
+    if(!this.state.mousedown){
+        return;
+    }
+    if (!this.props.isText){
+        let refval = posToVal(e.nativeEvent.clientX - this.state.offsetLeft, this.state.div_width);
+        //console.log(refval);
+        let thumbval = nearestVal(refval, this.props.points);
+        this.setState({mousedown: false, thumbval, thumbxpos: (thumbval - this.state.point_start_val)*this.state.div_width});
+    }else{
+        let thumbval = Math.round((e.nativeEvent.clientX - this.state.offsetLeft)/this.state.div_width)
+        this.setState({mousedown: false, thumbval: this.props.points[thumbval].val, thumbxpos: (thumbval)*this.state.div_width});
+    }
   }
 
   handleDragThrough(e) {
     //console.log(e.nativeEvent.offsetX);
     if(this.state.mousedown){
-        this.setState({thumbxpos: e.nativeEvent.offsetX});
+        this.setState({thumbxpos: e.nativeEvent.clientX - this.state.offsetLeft});
     }
   }
 
@@ -121,13 +154,12 @@ export default class Slider extends React.Component {
 
     
     return (
-        <div className = "container" onMouseDown = {this.handleDragEnter} onMouseUp = {this.handleDragExit} onMouseMove = {this.handleDragThrough}>
+        <div className = "container" onMouseDown = {this.handleDragEnter} onMouseUp = {this.handleDragExit} onMouseMove = {this.handleDragThrough} onMouseLeave = {this.handleDragExit} ref = {this.containerRef}>
             <StyledSlider width = {`${this.props.width}px`} >
                 <StyledThumb 
                     x = {`${this.state.thumbxpos - 3}px`}
-                    ref = {this.thumbRef}
             />
-                {this.props.isText ? genTextLabels(this.props.points, this.props.width) : genNumericLabels(this.props.points, this.props.width)}
+                {this.props.isText ? genTextLabels(this.props.points, this.state.div_width) : genNumericLabels(this.props.points, this.state.div_width, this.state.point_start_val)}
             </StyledSlider>
         </div>
     );
