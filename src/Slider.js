@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from "styled-components";
 import './Slider.css';
+import {Spring} from 'react-spring/renderprops'
 
 const StyledSlider = styled.div`
   position: relative;
@@ -156,12 +157,14 @@ export default class Slider extends React.Component {
     return (
         <div className = "container" onMouseDown = {this.handleDragEnter} onMouseUp = {this.handleDragExit} onMouseMove = {this.handleDragThrough} onMouseLeave = {this.handleDragExit} ref = {this.containerRef}>
             <StyledSlider width = {`${this.props.width}px`} >
-                <StyledThumb 
-                    x = {`${this.state.thumbxpos - 3}px`}
-            />
+                <Spring
+                    to={{ newx: this.state.thumbxpos}}>
+                    {props => <StyledThumb x = {`${props.newx - 3}px`}/>}
+                </Spring>
                 {this.props.isText ? genTextLabels(this.props.points, this.state.div_width) : genNumericLabels(this.props.points, this.state.div_width, this.state.point_start_val)}
             </StyledSlider>
         </div>
     );
   }
 }
+
