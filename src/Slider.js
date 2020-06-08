@@ -17,7 +17,6 @@ const StyledThumb = styled.div`
   border-radius: 3px;
   position: relative;
   top: -5px;
-  left: ${props => props.x };
   opacity: 0.8;
   background: #002266;
   cursor: pointer;
@@ -159,7 +158,7 @@ export default class Slider extends React.Component {
             <StyledSlider width = {`${this.props.width}px`} >
                 <Spring
                     to={{ newx: this.state.thumbxpos}}>
-                    {props => <StyledThumb x = {`${props.newx - 3}px`}/>}
+                    {props => <StyledThumb style={{left: `${props.newx - 3}px`}}/>}
                 </Spring>
                 {this.props.isText ? genTextLabels(this.props.points, this.state.div_width) : genNumericLabels(this.props.points, this.state.div_width, this.state.point_start_val)}
             </StyledSlider>
