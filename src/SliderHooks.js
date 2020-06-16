@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import styled from "styled-components";
 import './Slider.css';
-import {useSpring, animated} from 'react-spring';
+import {Spring} from 'react-spring/renderprops'
 
 const StyledSlider = styled.div`
   position: relative;
@@ -11,14 +11,19 @@ const StyledSlider = styled.div`
   width: ${props => props.width};
 `;
 
-const StyledThumb = styled(animated.div)`
+const StyledValueLabel = styled.p`
+    display: inline;
+    user-select: none;
+`;
+
+const StyledThumb = styled.div`
   width: 10px;
   height: 15px;
   border-radius: 3px;
   position: relative;
   top: -5px;
   opacity: 0.8;
-  background: #002266;
+  background: ${props => props.disabled ? "#404040" : "#002266"};
   cursor: pointer;
 `;
 
@@ -108,11 +113,36 @@ export default function Slider(props) {
         
 
     useEffect(() => {
-        const rect = containerRef.current.getBoundingClientRect();
-        setOffsetLeft(rect.left);
+        if(containerRef.current){
+            const rect = containerRef.current.getBoundingClientRect();
+            setOffsetLeft(rect.left);
+        }
     }, []);
 
-  
+    if(props.hide){
+        return null;
+    }
+
+    if(props.disabled) {
+        return (
+            <div className = "sliderContainer"  ref = {containerRef}>
+                <div style = {{height: (props.showControls||props.label) ? "20px": "0px"}}>
+                    {props.label? <StyledValueLabel>{props.points[index].val}</StyledValueLabel> : null}
+                    {props.showControls? <>
+                    <button style = {{float: "right", userSelect: "none"}} onClick = {handleNext} disabled>Next</button>
+                    <button style = {{float: "right", userSelect: "none"}} onClick = {handlePrevious} disabled>Prev</button>
+                    </> : null}
+                </div>
+                <div className = "subContainer2">
+                    <StyledSlider width = {`${props.width}px`} >
+                    <StyledThumb disabled style={{left: `${-3}px`}}/>
+                    {(props.showTicks === false) ? null : (props.isText ? generateTextLabels(props.points, divisionWidth) : generateNumericLabels(props.points, divisionWidth, startValue))}
+                    </StyledSlider>
+                </div>
+            </div>
+        );
+    }
+
     function handleDragEnter(e) {
         setIsMouseDown(true);
         setThumbXPos(e.nativeEvent.clientX - offsetLeft);
@@ -171,13 +201,54 @@ export default function Slider(props) {
         }
     }
 
+    function handleNext(e) {
+        if(index === props.points.length - 1){
+            return;
+        }
+
+        if(!props.isText){
+            setThumbXPos(props.points[index+1].val * divisionWidth);
+        }else{
+            setThumbXPos((index+1)*divisionWidth);
+        }
+
+        setThumbValue(props.points[index+1].val);
+        setIndex(index + 1);
+    }
+
+    function handlePrevious(e) {
+        if(index === 0){
+            return;
+        }
+
+        if(!props.isText){
+            setThumbXPos(props.points[index-1].val * divisionWidth);
+        }else{
+            setThumbXPos((index-1)*divisionWidth);
+        }
+
+        setThumbValue(props.points[index-1].val);
+        setIndex(index - 1);
+    }
     
     return (
-        <div className = "container" onMouseDown = {handleDragEnter} onMouseUp = {handleDragExit} onMouseMove = {handleDragThrough} onMouseLeave = {handleDragExit} ref = {containerRef}>
-            <StyledSlider width = {`${props.width}px`} >
-                <StyledThumb style={{left: `${thumbXPos - 3}px`}}/>
-                {props.isText ? generateTextLabels(props.points, divisionWidth) : generateNumericLabels(props.points, divisionWidth, startValue)}
-            </StyledSlider>
+        <div className = "sliderContainer"  ref = {containerRef}>
+            <div style = {{height: (props.showControls||props.label) ? "20px": "0px"}}>
+                {props.label? <StyledValueLabel>{props.points[index].val}</StyledValueLabel> : null}
+                {props.showControls? <>
+                <button style = {{float: "right", userSelect: "none"}} onClick = {handleNext}>Next</button>
+                <button style = {{float: "right", userSelect: "none"}} onClick = {handlePrevious}>Prev</button>
+                </> : null}
+            </div>
+            <div className = "subContainer2" onMouseDown = {handleDragEnter} onMouseUp = {handleDragExit} onMouseMove = {handleDragThrough} onMouseLeave = {handleDragExit}>
+                <StyledSlider width = {`${props.width}px`} >
+                <Spring
+                    to={{ x: thumbXPos }}>
+                    {props => <StyledThumb style={{left: `${props.x - 3}px`}}/>}
+                </Spring>
+                {(props.showTicks === false) ? null : (props.isText ? generateTextLabels(props.points, divisionWidth) : generateNumericLabels(props.points, divisionWidth, startValue))}
+                </StyledSlider>
+            </div>
         </div>
     );
 }
