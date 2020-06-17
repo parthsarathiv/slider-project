@@ -1,7 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import styled from "styled-components";
-import './Slider.css';
 import {Spring} from 'react-spring/renderprops'
+
+
+const SliderContainer = styled.div`
+    width: fit-content;
+    height: ${props => (props.labeled && props.noTicked) ? "60px" : props.labeled ? "80px" : props.noTicked ? "40px" : "60px"};
+`;
+
+const SubContainer2 = styled.div`
+    padding-top: 10px;
+    height: 50px;
+`;
 
 const StyledSlider = styled.div`
   position: relative;
@@ -125,7 +135,7 @@ export default function Slider(props) {
 
     if(props.disabled) {
         return (
-            <div className = "sliderContainer"  ref = {containerRef}>
+            <SliderContainer labeled = {(props.showControls||props.label)} noTicked = {props.showTicks === false} ref = {containerRef}>
                 <div style = {{height: (props.showControls||props.label) ? "20px": "0px"}}>
                     {props.label? <StyledValueLabel>{props.points[index].val}</StyledValueLabel> : null}
                     {props.showControls? <>
@@ -133,13 +143,13 @@ export default function Slider(props) {
                     <button style = {{float: "right", userSelect: "none"}} onClick = {handlePrevious} disabled>Prev</button>
                     </> : null}
                 </div>
-                <div className = "subContainer2">
+                <SubContainer2>
                     <StyledSlider width = {`${props.width}px`} >
                     <StyledThumb disabled style={{left: `${-3}px`}}/>
                     {(props.showTicks === false) ? null : (props.isText ? generateTextLabels(props.points, divisionWidth) : generateNumericLabels(props.points, divisionWidth, startValue))}
                     </StyledSlider>
-                </div>
-            </div>
+                </SubContainer2>
+            </SliderContainer>
         );
     }
 
@@ -232,7 +242,7 @@ export default function Slider(props) {
     }
     
     return (
-        <div className = "sliderContainer"  ref = {containerRef}>
+        <SliderContainer  ref = {containerRef} labeled = {(props.showControls||props.label)} noTicked = {props.showTicks === false}>
             <div style = {{height: (props.showControls||props.label) ? "20px": "0px"}}>
                 {props.label? <StyledValueLabel>{props.points[index].val}</StyledValueLabel> : null}
                 {props.showControls? <>
@@ -240,7 +250,7 @@ export default function Slider(props) {
                 <button style = {{float: "right", userSelect: "none"}} onClick = {handlePrevious}>Prev</button>
                 </> : null}
             </div>
-            <div className = "subContainer2" onMouseDown = {handleDragEnter} onMouseUp = {handleDragExit} onMouseMove = {handleDragThrough} onMouseLeave = {handleDragExit}>
+            <SubContainer2 onMouseDown = {handleDragEnter} onMouseUp = {handleDragExit} onMouseMove = {handleDragThrough} onMouseLeave = {handleDragExit}>
                 <StyledSlider width = {`${props.width}px`} >
                 <Spring
                     to={{ x: thumbXPos }}>
@@ -248,8 +258,8 @@ export default function Slider(props) {
                 </Spring>
                 {(props.showTicks === false) ? null : (props.isText ? generateTextLabels(props.points, divisionWidth) : generateNumericLabels(props.points, divisionWidth, startValue))}
                 </StyledSlider>
-            </div>
-        </div>
+            </SubContainer2>
+        </SliderContainer>
     );
 }
 

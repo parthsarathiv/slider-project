@@ -2,6 +2,32 @@ import React from 'react';
 import styled from "styled-components";
 import './Slider.css';
 import {Spring} from 'react-spring/renderprops'
+// .sliderContainer {
+//     width: fit-content;
+//     height: 100px;
+//   }
+// .subContainer1{
+//   height: 20px;
+// }
+
+// .subContainer2 {
+//   padding-top: 10px;
+//   height: 50px;
+// }
+
+
+// const sliderContainer = styled.div`
+//     width: fit-content;
+//     height: 100px;
+// `;
+
+// const subContainer1 = styled.div`
+//     height: 20px;
+// `;
+// const subContainer2 = styled.div`
+// padding-top: 10px;
+// height: 50px;
+// `;
 
 const StyledSlider = styled.div`
   position: relative;

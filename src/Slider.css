@@ -1,10 +1,8 @@
 .sliderContainer {
     width: fit-content;
-    height: 100px;
+    height: 60px;
   }
-.subContainer1{
-  height: 20px;
-}
+
 
 .subContainer2 {
   padding-top: 10px;

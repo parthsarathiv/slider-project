@@ -32,6 +32,16 @@ function App() {
         { val: 10, label: "10" }
       ]}/>
 
+      <p>Slider 3.5</p>
+      <Slider showTicks = {false} isText = {false} height = {20} width = {500} points={[
+        { val: 0, label: "0" },
+        { val: 2, label: "2" },
+        { val: 4, label: "4" },
+        { val: 6, label: "6" },
+        { val: 8, label: "8" },
+        { val: 10, label: "10" }
+      ]}/>
+
       <p>Slider 4</p>
       <Slider label showTicks = {false} showControls isText = {false} height = {20} width = {500} points={[
         { val: 0, label: "0" },
